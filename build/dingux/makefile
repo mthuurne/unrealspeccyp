@@ -38,20 +38,19 @@ LFLAGS   := -s $(shell $(SYSROOT)/usr/bin/sdl-config --libs)
 
 all: build
 
-mkdirs:
-	mkdir -p $(DIST_PATH)
-	mkdir -p $(foreach dir, $(SRCFOLDERS), $(OBJ_PATH)/$(dir))
-	
 $(CXX_OBJS): $(OBJ_PATH)/%.o : $(SRC_PATH)/%.cpp
+	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
 $(C_OBJS): $(OBJ_PATH)/%.o : $(SRC_PATH)/%.c
+	@mkdir -p $(@D)
 	$(C) $(CFLAGS) -o $@ $<
 
 $(BIN_TARGET): $(CXX_OBJS) $(C_OBJS)
+	@mkdir -p $(@D)
 	$(CXX) $(LFLAGS) $^ -o$(BIN_TARGET)
 
-build: mkdirs $(BIN_TARGET)
+build: $(BIN_TARGET)
 
 clean:
 	rm -rf $(CXX_OBJS)
