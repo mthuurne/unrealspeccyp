@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef USE_PNG
 
 #include "../speccy.h"
-#include "../tools/libpng/png.h"
+#include "png.h"
 #include "../file_type.h"
 
 namespace xScreenshot
