@@ -10,9 +10,10 @@ SRC_PATH := ../..
 OUTPUT_BASE := $(DEVICE)-$(FLAVOR)
 
 PROJECT_NAME := unreal_speccy_portable
-SRCFOLDERS := . z80 tools tools/zlib tools/libpng tools/tinyxml snapshot ui platform platform/custom_ui platform/linux platform/sdl devices devices/fdd devices/input devices/sound
+SRCFOLDERS := . z80 tools tools/tinyxml snapshot ui platform platform/custom_ui platform/linux platform/sdl devices devices/fdd devices/input devices/sound
 CXXSRCS := $(foreach dir, $(SRCFOLDERS), $(wildcard $(SRC_PATH)/$(dir)/*.cpp))
 CSRCS := $(foreach dir, $(SRCFOLDERS), $(wildcard $(SRC_PATH)/$(dir)/*.c))
+CSRCS += $(SRC_PATH)/tools/zlib/ioapi.c $(SRC_PATH)/tools/zlib/unzip.c
 
 CXX := mipsel-$(DEVICE)-linux-uclibc-g++
 C := mipsel-$(DEVICE)-linux-uclibc-gcc
@@ -36,9 +37,13 @@ STD_OPTS += -g -O0 -DDEBUG
 else
 STD_OPTS += -O3 -fomit-frame-pointer -DNDEBUG
 endif
-CXXFLAGS := $(STD_OPTS) -fno-rtti -fno-threadsafe-statics -D_LINUX -DUSE_SDL -DSDL_KEYS_DINGOO $(shell $(SYSROOT)/usr/bin/sdl-config --cflags)
+CXXFLAGS := $(STD_OPTS) -fno-rtti -fno-threadsafe-statics \
+		-D_LINUX -DUSE_SDL -DSDL_KEYS_DINGOO \
+		$(shell $(SYSROOT)/usr/bin/sdl-config --cflags) \
+		$(shell $(SYSROOT)/usr/bin/libpng-config --cflags)
 CFLAGS   := $(STD_OPTS)
-LFLAGS   := -s $(shell $(SYSROOT)/usr/bin/sdl-config --libs)
+LFLAGS   := -s $(shell $(SYSROOT)/usr/bin/sdl-config --libs) \
+		$(shell $(SYSROOT)/usr/bin/libpng-config --libs) -lz
 
 all: build
 
