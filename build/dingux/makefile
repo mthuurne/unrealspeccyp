@@ -7,7 +7,7 @@ DEVICE := gcw0
 $(info Building for $(DEVICE) in $(FLAVOR) mode...)
 
 SRC_PATH := ../..
-OBJ_BASE := $(DEVICE)-$(FLAVOR)
+OUTPUT_BASE := $(DEVICE)-$(FLAVOR)
 
 PROJECT_NAME := unreal_speccy_portable
 SRCFOLDERS := . z80 tools tools/zlib tools/libpng tools/tinyxml snapshot ui platform platform/custom_ui platform/linux platform/sdl devices devices/fdd devices/input devices/sound
@@ -18,13 +18,17 @@ CXX := mipsel-$(DEVICE)-linux-uclibc-g++
 C := mipsel-$(DEVICE)-linux-uclibc-gcc
 SYSROOT := /opt/$(DEVICE)-toolchain/usr/mipsel-$(DEVICE)-linux-uclibc/sysroot/
 
-DIST_PATH := $(OBJ_BASE)
-OBJ_PATH := $(OBJ_BASE)
+DIST_PATH := $(OUTPUT_BASE)/dist
+OBJ_PATH := $(OUTPUT_BASE)/obj
 CXX_OBJS := $(patsubst $(SRC_PATH)/%.cpp,$(OBJ_PATH)/%.o,$(CXXSRCS))
 CXX_DEPS := $(patsubst $(SRC_PATH)/%.cpp,$(OBJ_PATH)/%.d,$(CXXSRCS))
 C_OBJS := $(patsubst $(SRC_PATH)/%.c,$(OBJ_PATH)/%.o,$(CSRCS))
 C_DEPS := $(patsubst $(SRC_PATH)/%.c,$(OBJ_PATH)/%.d,$(CSRCS))
 BIN_TARGET := $(DIST_PATH)/$(PROJECT_NAME)
+OPK_TARGET := $(DIST_PATH)/$(PROJECT_NAME).opk
+
+DESKTOP_ENTRY := default.$(DEVICE).desktop
+ICON := icon-32x32.png
 
 STD_OPTS := -G0 -Wall -c -fmessage-length=0 -fno-builtin -fno-exceptions -fno-pic
 ifeq ($(FLAVOR),debug)
@@ -50,7 +54,10 @@ $(BIN_TARGET): $(CXX_OBJS) $(C_OBJS)
 	@mkdir -p $(@D)
 	$(CXX) $(LFLAGS) $^ -o$(BIN_TARGET)
 
-build: $(BIN_TARGET)
+$(OPK_TARGET): $(BIN_TARGET) $(DESKTOP_ENTRY) $(ICON)
+	mksquashfs $^ $(SRC_PATH)/res $@ -noappend -comp gzip -all-root
+
+build: $(OPK_TARGET)
 
 clean:
 	rm -rf $(CXX_OBJS)
